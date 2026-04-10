@@ -4,9 +4,7 @@ import commonIcons from "@/icons/commonIcons";
 
 interface GestureWindowProps {
   onGestureDetected: (gesture: string) => void;
-  /** Override height class; defaults to h-[652px] */
   heightClass?: string;
-  /** Use absolute positioning (NavigationPage layout) instead of relative */
   absolute?: boolean;
 }
 
@@ -26,11 +24,10 @@ function gestureToIndex(gesture: string): number | null {
   return null;
 }
 
-// Per-slot visual config: [current, previous, older]
 const SLOT_STYLES = [
-  { widthPct: 100, heightPx: 56, opacity: 1,    fontSize: 22 },
-  { widthPct: 60,  heightPx: 34, opacity: 0.4,  fontSize: 16 },
-  { widthPct: 36,  heightPx: 20, opacity: 0.15, fontSize: 11 },
+  { widthPct: 100, heightPx: 56, opacity: 1, fontSize: 22 },
+  { widthPct: 60, heightPx: 34, opacity: 0.4, fontSize: 16 },
+  { widthPct: 36, heightPx: 20, opacity: 0.15, fontSize: 11 },
 ] as const;
 
 export function GestureWindow({
@@ -41,7 +38,6 @@ export function GestureWindow({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [gestureHistory, setGestureHistory] = useState<GestureHistoryItem[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  // Track last detected index to prevent redundant state updates
   const lastIdxRef = useRef<number | null>(null);
   const historyIdRef = useRef(0);
 
@@ -60,51 +56,85 @@ export function GestureWindow({
 
   useEffect(() => {
     let stream: MediaStream | null = null;
+    let cancelled = false;
 
     async function setupCamera() {
+      console.log("[GestureWindow] Starting camera setup...");
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        console.error("[GestureWindow] Camera API not available — requires localhost or HTTPS.");
+        return;
+      }
+
       try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          console.error("Camera API not supported. Use localhost or HTTPS.");
-          return;
-        }
         stream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
         });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().catch((e) => console.error("Video play error:", e));
-          };
+
+        const tracks = stream.getVideoTracks();
+        console.log(
+          `[GestureWindow] getUserMedia OK — ${tracks.length} video track(s):`,
+          tracks.map((t) => ({ label: t.label, enabled: t.enabled, readyState: t.readyState })),
+        );
+
+        if (cancelled) {
+          console.log("[GestureWindow] Component unmounted during setup; stopping stream.");
+          stream.getTracks().forEach((t) => t.stop());
+          return;
         }
+
+        const video = videoRef.current;
+        if (!video) {
+          console.error("[GestureWindow] videoRef.current is null after getUserMedia.");
+          return;
+        }
+
+        video.srcObject = stream;
+        console.log("[GestureWindow] stream attached to <video>. Waiting for loadedmetadata...");
+
+        video.onloadedmetadata = () => {
+          console.log(
+            `[GestureWindow] loadedmetadata fired — videoWidth=${video.videoWidth}, videoHeight=${video.videoHeight}`,
+          );
+          video
+            .play()
+            .then(() => console.log("[GestureWindow] video.play() resolved OK."))
+            .catch((e) => console.error("[GestureWindow] video.play() rejected:", e));
+        };
+
+        video.onerror = () => {
+          console.error("[GestureWindow] <video> error event:", video.error);
+        };
       } catch (err) {
-        console.error("Camera access error:", err);
+        console.error("[GestureWindow] getUserMedia failed:", err);
       }
     }
 
     setupCamera();
+
     return () => {
-      stream?.getTracks().forEach((t) => t.stop());
+      cancelled = true;
+      if (stream) {
+        console.log("[GestureWindow] Cleanup — stopping stream tracks.");
+        stream.getTracks().forEach((t) => t.stop());
+      }
     };
   }, []);
 
   const containerClass = absolute
-    ? `absolute content-stretch flex flex-col gap-[12px] items-center left-0 min-w-[300px] overflow-clip p-[12px] rounded-[24px] top-[-6px] w-[300px] ${heightClass}`
-    : `content-stretch flex flex-col gap-[12px] items-center min-w-[300px] overflow-clip p-[12px] relative rounded-[24px] shrink-0 w-[300px] ${heightClass}`;
+    ? `absolute isolate flex flex-col gap-[12px] items-center left-0 min-w-[300px] overflow-clip p-[12px] rounded-[24px] top-[-6px] w-[300px] ${heightClass}`
+    : `isolate flex flex-col gap-[12px] items-center min-w-[300px] overflow-clip p-[12px] relative rounded-[24px] shrink-0 w-[300px] ${heightClass}`;
 
   return (
     <div className={containerClass} data-name="手势窗">
-      {/* Glass background overlay — plain gradient, no backdrop-filter and no blend mode.
-          mix-blend-multiply is removed: combined with a GPU-composited video sibling it
-          forces the browser to render everything into an offscreen compositing group and
-          then multiply-blend the whole group, causing the video to become near-black.
-          Alpha raised to 0.55 / 0.5 to compensate for the removed multiply darkening. */}
+      {/* Background tint — z-0, no blend mode, no backdrop-filter */}
       <div
         aria-hidden="true"
-        className="absolute bg-gradient-to-b from-[rgba(34,50,75,0.55)] to-[rgba(59,62,78,0.5)] inset-0 pointer-events-none rounded-[24px]"
+        className="absolute z-0 bg-gradient-to-b from-[rgba(34,50,75,0.55)] to-[rgba(59,62,78,0.5)] inset-0 pointer-events-none rounded-[24px]"
       />
 
-      {/* Gesture History Label Area — fixed height, newest at bottom */}
-      <div className="relative h-[160px] w-full overflow-hidden flex flex-col-reverse items-center justify-start gap-[8px] shrink-0">
+      {/* Gesture History Label Area */}
+      <div className="relative z-10 h-[160px] w-full overflow-hidden flex flex-col-reverse items-center justify-start gap-[8px] shrink-0">
         {gestureHistory.map((item, i) => {
           const slot = SLOT_STYLES[Math.min(i, 2)];
           return (
@@ -115,7 +145,7 @@ export function GestureWindow({
             >
               <div
                 aria-hidden="true"
-                className="absolute backdrop-blur-[2px] bg-[rgba(38,38,38,0.72)] inset-0 mix-blend-multiply pointer-events-none rounded-[39px]"
+                className="absolute bg-[rgba(38,38,38,0.72)] inset-0 pointer-events-none rounded-[39px]"
               />
               <p
                 className="absolute font-['PingFang_SC:Regular',sans-serif] leading-[normal] not-italic text-white whitespace-nowrap transition-all duration-500 ease-in-out"
@@ -128,23 +158,24 @@ export function GestureWindow({
         })}
       </div>
 
-      {/* Camera Feed — fixed height.
-          Subtle background makes the area visible even before the stream loads.
-          No GPU-promotion hints on the video — these combined with any sibling blend
-          mode force an offscreen compositing group that renders the video invisible. */}
-      <div className="bg-black/20 h-[167px] relative overflow-hidden rounded-[24px] shrink-0 w-full">
+      {/* Camera Feed */}
+      <div className="relative z-10 bg-black/30 h-[167px] overflow-hidden rounded-[24px] shrink-0 w-full">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ transform: "scaleX(-1)" }}
         />
       </div>
 
-      {/* Gesture Icon Display — fills remaining height */}
-      <div className="flex-1 min-h-0 overflow-clip relative rounded-[24px] w-full">
-        <div aria-hidden="true" className="absolute bg-[rgba(35,35,35,0.5)] inset-0 mix-blend-multiply pointer-events-none rounded-[24px]" />
+      {/* Gesture Icon Display */}
+      <div className="relative z-10 flex-1 min-h-0 overflow-clip rounded-[24px] w-full">
+        <div
+          aria-hidden="true"
+          className="absolute bg-[rgba(35,35,35,0.5)] inset-0 pointer-events-none rounded-[24px]"
+        />
         <div className="absolute left-0 overflow-clip rounded-[32px] size-[276px] top-[33px]" data-name="手势">
           <div className="-translate-x-1/2 -translate-y-1/2 absolute h-[152px] left-[calc(50%+1px)] top-[calc(50%+1px)] w-[130px]">
             {currentIndex === 0 && (
