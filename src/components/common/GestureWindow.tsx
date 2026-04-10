@@ -93,14 +93,14 @@ export function GestureWindow({
 
   return (
     <div className={containerClass} data-name="手势窗">
-      {/* Glass background overlay.
-          backdrop-blur is intentionally removed: any backdrop-filter on an element sharing
-          a compositing group with a playing <video> causes Chrome/Blink to invalidate and
-          re-composite the filter on every video frame, producing persistent flickering.
-          The gradient + mix-blend-multiply alone retain the colour-tint glass effect. */}
+      {/* Glass background overlay — plain gradient, no backdrop-filter and no blend mode.
+          mix-blend-multiply is removed: combined with a GPU-composited video sibling it
+          forces the browser to render everything into an offscreen compositing group and
+          then multiply-blend the whole group, causing the video to become near-black.
+          Alpha raised to 0.55 / 0.5 to compensate for the removed multiply darkening. */}
       <div
         aria-hidden="true"
-        className="absolute bg-gradient-to-b from-[rgba(34,50,75,0.3)] to-[rgba(59,62,78,0.3)] inset-0 mix-blend-multiply pointer-events-none rounded-[24px]"
+        className="absolute bg-gradient-to-b from-[rgba(34,50,75,0.55)] to-[rgba(59,62,78,0.5)] inset-0 pointer-events-none rounded-[24px]"
       />
 
       {/* Gesture History Label Area — fixed height, newest at bottom */}
@@ -128,17 +128,17 @@ export function GestureWindow({
         })}
       </div>
 
-      {/* Camera Feed — fixed height, no background tint.
-          translateZ(0) promotes the video to its own GPU compositing layer so it is
-          isolated from any filter/blend operations on sibling overlay elements. */}
-      <div className="h-[167px] relative overflow-hidden rounded-[24px] shrink-0 w-full">
+      {/* Camera Feed — fixed height.
+          Subtle background makes the area visible even before the stream loads.
+          No GPU-promotion hints on the video — these combined with any sibling blend
+          mode force an offscreen compositing group that renders the video invisible. */}
+      <div className="bg-black/20 h-[167px] relative overflow-hidden rounded-[24px] shrink-0 w-full">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
           className="absolute inset-0 w-full h-full object-cover -scale-x-100"
-          style={{ transform: "translateZ(0)", willChange: "transform" }}
         />
       </div>
 
