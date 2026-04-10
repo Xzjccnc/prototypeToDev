@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
 import svgPaths from "./svg-d2ptzwqpoz";
 import img20091375005131120641 from "figma:asset/9a7a4c29b4df435e255a166237e3d537fbe93e3c.png";
 import img from "figma:asset/c0ae25775c422c652a982fbf7231ff7c5b21c874.png";
 import { PageSidebar } from "../app/components/PageSidebar";
+import { useGestureRecognition } from "../app/hooks/useGestureRecognition";
 
 function Frame3() {
   return (
@@ -204,41 +205,115 @@ function Component13() {
   );
 }
 
-function Frame2() {
-  return <div className="bg-[rgba(35,35,35,0.5)] h-[212px] mix-blend-multiply rounded-[24px] shrink-0 w-full" />;
-}
+function DeviceGestureWindow({ onNavigate }: { onNavigate?: (page: string) => void }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-function Component19() {
-  return (
-    <div className="h-[263px] overflow-clip relative rounded-[32px] shrink-0 w-full" data-name="手势">
-      <div aria-hidden="true" className="absolute bg-[rgba(64,136,163,0.19)] inset-0 mix-blend-multiply pointer-events-none rounded-[32px]" />
-      <div className="-translate-x-1/2 -translate-y-1/2 absolute h-[150px] left-[calc(50%+0.5px)] top-[calc(50%+0.5px)] w-[129px]" data-name="手掌">
-        <div className="absolute inset-[-0.59%_-0.75%_-1.23%_0.11%]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 129.823 152.739">
-            <g id="ææ">
-              <path d={svgPaths.pe103c00} fill="var(--fill-0, #7C90A3)" fillOpacity="0.61" style={{ mixBlendMode: "multiply" }} />
-              <path d={svgPaths.pe103c00} stroke="var(--stroke-0, white)" strokeWidth="2" />
-            </g>
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
+  useGestureRecognition(videoRef, (gesture) => {
+    if (gesture === "Closed_Fist") setCurrentIndex(0);
+    else if (gesture === "Open_Palm") setCurrentIndex(1);
+    else if (gesture === "Swipe_Up" || gesture === "Swipe_Down") {
+      setCurrentIndex(1);
+      onNavigate?.("music");
+    }
+    else if (gesture === "Pointing_Up") {
+      setCurrentIndex(2);
+      onNavigate?.("home");
+    }
+    else if (gesture === "Victory" || gesture === "ILoveYou") {
+      setCurrentIndex(3);
+      onNavigate?.("nav");
+    }
+    else if (gesture === "Thumb_Up" || gesture === "Thumb_Down") setCurrentIndex(4);
+  }, 1000);
 
-function Component18() {
-  return (
-    <div className="bg-[rgba(35,35,35,0.5)] content-stretch flex flex-col h-[295px] items-center justify-between min-w-[300px] overflow-clip p-[12px] relative rounded-[24px] shrink-0 w-[300px]" data-name="手势窗">
-      <Component19 />
-    </div>
-  );
-}
+  useMemo(() => {
+    let stream: MediaStream | null = null;
+    async function setupCamera() {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } 
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(e => console.error("Error playing video:", e));
+          };
+        }
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+      }
+    }
+    setupCamera();
+    return () => {
+      if (stream) stream.getTracks().forEach(track => track.stop());
+    };
+  }, []);
 
-function Component17() {
   return (
     <div className="content-stretch flex flex-col gap-[34px] h-[541px] items-center justify-end overflow-clip px-px relative rounded-[12px] shrink-0" data-name="设备控制">
-      <Frame2 />
-      <Component18 />
+      <div className="bg-[rgba(35,35,35,0.5)] h-[167px] relative overflow-hidden mix-blend-multiply rounded-[24px] shrink-0 w-[300px]">
+        <video 
+          ref={videoRef} 
+          autoPlay 
+          playsInline 
+          muted 
+          className="w-full h-full object-cover"
+          style={{ transform: "scaleX(-1)" }}
+        />
+      </div>
+      <div className="bg-[rgba(35,35,35,0.5)] content-stretch flex flex-col h-[295px] items-center justify-center min-w-[300px] overflow-clip p-[12px] relative rounded-[24px] shrink-0 w-[300px]" data-name="手势窗">
+        <div className="h-[263px] overflow-clip relative rounded-[32px] shrink-0 w-full" data-name="手势">
+          <div aria-hidden="true" className="absolute bg-[rgba(64,136,163,0.19)] inset-0 mix-blend-multiply pointer-events-none rounded-[32px]" />
+          <div className="-translate-x-1/2 -translate-y-1/2 absolute h-[152px] left-[calc(50%+1px)] top-[calc(50%+1px)] w-[130px] flex items-center justify-center">
+            {currentIndex === 0 && (
+              <svg className="block size-full" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 100 100">
+                <path d="M28,30 C20,38 12,48 10,60 C15,80 35,95 55,95 C75,95 85,80 88,60 C90,40 75,25 65,22 C60,20 50,22 40,25 C35,28 32,29 28,30 Z" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinejoin="round" />
+                <path d="M28,30 C30,22 35,18 42,18 C50,18 55,22 55,28" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+                <path d="M40,25 C42,15 48,10 55,10 C65,10 70,15 70,25" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+                <path d="M55,28 C58,18 65,12 75,15 C82,18 85,25 82,35" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+                <path d="M38,35 C45,32 55,30 65,35 C70,38 75,45 72,50 C68,55 58,58 50,55" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M38,35 C32,45 40,55 48,50" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M50,55 C55,60 65,58 68,52" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            {currentIndex === 1 && (
+              <svg className="block size-full" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 130 153">
+                <path d="M57.6,151 C28,151 7.2,122.8 7.2,95 C7.2,75 14,60 21,48" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+                <path d="M21,48 C28,32 35,28 42,32 C48,36 48,45 45,55 L40,65" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M40,65 L48,35 C52,20 60,18 65,22 C72,28 68,40 62,55" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M62,55 L70,25 C75,10 82,8 88,15 C95,22 88,38 82,55" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M82,55 L90,35 C95,22 102,20 108,25 C115,32 105,50 95,70 C85,90 95,110 115,120" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M115,120 C125,125 125,140 115,145 C100,150 75,151 57.6,151 Z" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            {currentIndex === 2 && (
+              <svg className="block size-full" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 100 100">
+                <path d="M45,20 C45,10 55,10 55,20 L55,45 C65,45 70,50 70,60 C70,75 60,85 50,85 C40,85 30,75 30,60 C30,50 35,45 45,45 Z" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinejoin="round" />
+                <path d="M45,45 L35,45 C30,45 25,50 25,55" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M55,45 L65,45 C70,45 75,50 75,55" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M50,85 L50,95" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            )}
+            {currentIndex === 3 && (
+              <svg className="block size-full" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 100 100">
+                <path d="M35,20 C35,10 45,10 45,20 L45,45 L55,45 L55,20 C55,10 65,10 65,20 L65,50 C75,50 80,60 80,70 C80,85 65,95 50,95 C35,95 20,85 20,70 C20,60 25,50 35,50 Z" fill="#262626" stroke="#D9D9D9" strokeWidth="3" strokeLinejoin="round" />
+                <path d="M45,45 L45,60" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+                <path d="M55,45 L55,60" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+                <path d="M20,70 C15,60 20,45 28,35" fill="none" stroke="#D9D9D9" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+            )}
+            {currentIndex === 4 && (
+              <svg className="block size-full" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 130 154">
+                <path d="M65 40 L 65 90 C 65 110, 50 120, 50 140 C 70 150, 90 140, 95 110 L 105 80 C 110 70, 90 60, 85 75 L 80 85 L 80 50 C 80 40, 65 40, 65 50 Z" fill="#262626" stroke="#D9D9D9" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M30 60 A 20 20 0 1 1 50 80" fill="none" stroke="#D9D9D9" strokeWidth="4" strokeLinecap="round" />
+                <path d="M45 75 L 50 80 L 55 75" fill="none" stroke="#D9D9D9" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -355,10 +430,10 @@ function Component20({ sliderValue, setSliderValue }: { sliderValue: number, set
   );
 }
 
-function Frame6({ sliderValue, setSliderValue }: { sliderValue: number, setSliderValue: (val: number) => void }) {
+function Frame6({ sliderValue, setSliderValue, onNavigate }: { sliderValue: number, setSliderValue: (val: number) => void, onNavigate?: (page: string) => void }) {
   return (
     <div className="content-stretch flex h-[535px] items-end justify-between overflow-clip relative shrink-0 w-[1694px]">
-      <Component17 />
+      <DeviceGestureWindow onNavigate={onNavigate} />
       <Component20 sliderValue={sliderValue} setSliderValue={setSliderValue} />
     </div>
   );
@@ -606,48 +681,48 @@ function Component25() {
   );
 }
 
-function Component16({ sliderValue, setSliderValue }: { sliderValue: number, setSliderValue: (val: number) => void }) {
+function Component16({ sliderValue, setSliderValue, onNavigate }: { sliderValue: number, setSliderValue: (val: number) => void, onNavigate?: (page: string) => void }) {
   return (
     <div className="content-stretch flex flex-[1_0_0] flex-col h-[676px] items-center justify-between min-h-px min-w-px overflow-clip pb-[18px] pt-[8px] relative rounded-[24px]" data-name="设备页">
-      <Frame6 sliderValue={sliderValue} setSliderValue={setSliderValue} />
+      <Frame6 sliderValue={sliderValue} setSliderValue={setSliderValue} onNavigate={onNavigate} />
       <Component25 />
     </div>
   );
 }
 
-function Frame() {
+function Frame({ onNavigate }: { onNavigate?: (page: string) => void }) {
   const [sliderValue, setSliderValue] = useState(0);
 
   return (
     <div className="content-stretch flex h-[676px] items-end overflow-clip relative rounded-[32px] shrink-0 w-[1778px]">
-      <Component16 sliderValue={sliderValue} setSliderValue={setSliderValue} />
+      <Component16 sliderValue={sliderValue} setSliderValue={setSliderValue} onNavigate={onNavigate} />
     </div>
   );
 }
 
-function Component4() {
+function Component4({ onNavigate }: { onNavigate?: (page: string) => void }) {
   return (
     <div className="h-[676px] relative shrink-0 w-full" data-name="设备">
       <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
         <div className="content-stretch flex gap-[16px] items-center pr-[12px] py-[12px] relative size-full">
-          <PageSidebar activePage="device" dataName="sider-bar" />
-          <Frame />
+          <PageSidebar activePage="device" dataName="sider-bar" onNavigate={onNavigate} />
+          <Frame onNavigate={onNavigate} />
         </div>
       </div>
     </div>
   );
 }
 
-function DemoContent() {
+function DemoContent({ onNavigate }: { onNavigate?: (page: string) => void }) {
   return (
     <div className="absolute content-stretch flex flex-col items-start left-0 top-0 w-[1920px]" data-name="设备demo">
       <Component1 />
-      <Component4 />
+      <Component4 onNavigate={onNavigate} />
     </div>
   );
 }
 
-export default function Component() {
+export default function Component({ onNavigate }: { onNavigate?: (page: string) => void }) {
   return (
     <div className="relative size-full" data-name="设备页">
       <div className="absolute inset-0 h-full w-full" data-name="2009137500513112064 1">
@@ -661,7 +736,7 @@ export default function Component() {
           }}
         />
       </div>
-      <DemoContent />
+      <DemoContent onNavigate={onNavigate} />
     </div>
   );
 }

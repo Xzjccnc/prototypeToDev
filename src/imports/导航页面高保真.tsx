@@ -17,13 +17,65 @@ function createBaiduMapUrl(query: string) {
 }
 
 function MapPanel({ mapUrl }: { mapUrl: string }) {
+  // Extract query from mapUrl to update map center dynamically
+  const queryMatch = mapUrl.match(/query=([^&]+)/) || mapUrl.match(/title=([^&]+)/);
+  const query = queryMatch ? decodeURIComponent(queryMatch[1]) : "天府广场";
+
+  const mapHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #222; }
+        /* Hide all Baidu map controls and logos */
+        .anchorBL, .BMap_cpyCtrl, .BMap_scaleCtrl, .BMap_stdMpCtrl, .BMap_noprint { display: none !important; }
+      </style>
+      <script src="https://api.map.baidu.com/api?v=3.0&ak=E4805d16520de693a3fe707cdc962045"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script>
+        try {
+          var map = new BMap.Map("map");
+          map.enableScrollWheelZoom(true);
+          // Dark style to match prototype
+          map.setMapStyleV2({
+            styleJson: [{
+              "featureType": "all",
+              "elementType": "all",
+              "stylers": {
+                "lightness": 10,
+                "saturation": -100
+              }
+            }]
+          });
+          
+          var local = new BMap.LocalSearch(map, {
+            onSearchComplete: function(results) {
+              if (local.getStatus() == BMAP_STATUS_SUCCESS) {
+                var pt = results.getPoi(0).point;
+                map.centerAndZoom(pt, 16);
+                map.addOverlay(new BMap.Marker(pt));
+              } else {
+                map.centerAndZoom(new BMap.Point(104.066541, 30.572269), 16);
+              }
+            }
+          });
+          local.search("${query}");
+        } catch(e) {}
+      </script>
+    </body>
+    </html>
+  `;
+
   return (
-    <div className="absolute h-[456px] overflow-hidden right-0 rounded-[24px] top-0 w-[1002px] pointer-events-auto" style={{ pointerEvents: 'auto', zIndex: 10 }}>
-      <div aria-hidden="true" className="absolute backdrop-blur-[25px] bg-[rgba(35,35,35,0.35)] inset-0 pointer-events-none rounded-[24px]" />
+    <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-auto" style={{ zIndex: 0 }}>
+      <div aria-hidden="true" className="absolute backdrop-blur-[25px] bg-[rgba(35,35,35,0.35)] inset-0 pointer-events-none rounded-[32px]" />
       <iframe
-        className="absolute inset-0 h-full w-full border-0 rounded-[24px]"
+        className="absolute inset-0 h-full w-full border-0 rounded-[32px]"
         style={{ pointerEvents: 'auto' }}
-        src={mapUrl}
+        srcDoc={mapHtml}
         title="百度地图"
       />
     </div>
@@ -333,7 +385,8 @@ function GestureWindow({ onGestureDetected }: { onGestureDetected: (gesture: str
           autoPlay 
           playsInline 
           muted 
-          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
+          className="w-full h-full object-cover"
+          style={{ transform: "scaleX(-1)" }}
         />
       </div>
 
@@ -800,7 +853,7 @@ function Frame16({
   searchValue: string;
 }) {
   return (
-    <div className="content-stretch flex items-end justify-between relative shrink-0 w-[1411px]">
+    <div className="content-stretch flex items-end justify-between relative size-full pointer-events-none [&>*]:pointer-events-auto">
       <Frame24
         onQuickSearch={onQuickSearch}
         onSearchSubmit={onSearchSubmit}
@@ -834,11 +887,11 @@ function Frame17({
   return (
     <div className="content-stretch flex gap-[16px] items-center pr-[12px] py-[12px] relative size-full">
       <PageSidebar activePage="nav" dataName="sider-bar" />
-      <div className="content-stretch flex h-[652px] items-end justify-between relative rounded-[32px] shrink-0 w-[1778px]">
+      <div className="content-stretch flex h-[652px] items-start justify-start gap-[16px] relative rounded-[32px] shrink-0 w-[1778px]">
         <Frame14 onNavigate={onNavigate} />
-        <div className="h-full relative shrink-0 w-[1411px]">
+        <div className="h-full relative flex-1 min-w-0">
           <MapPanel mapUrl={mapUrl} />
-          <div className="absolute bottom-0 left-0">
+          <div className="absolute inset-0 pointer-events-none">
             <Frame16
               onQuickSearch={onQuickSearch}
               onSearchSubmit={onSearchSubmit}

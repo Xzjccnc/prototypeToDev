@@ -62,8 +62,8 @@ export default function App() {
         {/* Page */}
         <div style={{ position: "absolute", inset: 0 }}>
           {activePage === "home"   && <HomePage   onNavigate={setActivePage} />}
-          {activePage === "nav"    && <NavPage />}
-          {activePage === "device" && <DevicePage />}
+          {activePage === "nav"    && <NavPage    onNavigate={setActivePage} />}
+          {activePage === "device" && <DevicePage onNavigate={setActivePage} />}
           {activePage === "music"  && <MusicPage  onNavigate={setActivePage} />}
         </div>
         {/* Sidebar nav tap zones */}

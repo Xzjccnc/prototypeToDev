@@ -261,7 +261,8 @@ function GestureWindow({ onGestureDetected }: { onGestureDetected: (gesture: str
           autoPlay 
           playsInline 
           muted 
-          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
+          className="w-full h-full object-cover"
+          style={{ transform: "scaleX(-1)" }}
         />
       </div>
       <div className="h-[330px] overflow-clip relative rounded-[24px] shrink-0 w-full">

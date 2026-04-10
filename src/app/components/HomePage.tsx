@@ -219,7 +219,8 @@ function GestureWindow({ onGestureDetected }: { onGestureDetected: (gesture: str
           autoPlay 
           playsInline 
           muted 
-          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
+          className="w-full h-full object-cover"
+          style={{ transform: "scaleX(-1)" }}
         />
       </div>
       {/* Hand gesture panel */}
