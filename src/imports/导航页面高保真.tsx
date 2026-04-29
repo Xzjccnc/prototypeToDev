@@ -3,8 +3,8 @@ import type { FormEvent } from "react";
 import svgPaths from "./svg-ujsdf0art7";
 import img from "figma:asset/b1457bb4909c074b9ca61a20211a75f7d79e1703.png";
 import img1 from "figma:asset/db85ce748e0e50fb1dd3b019004adb2ab53b0657.png";
-import { PageSidebar } from "../app/components/PageSidebar";
-import { useGestureRecognition } from "../app/hooks/useGestureRecognition";
+import { PageSidebar } from "@/components/common/PageSidebar";
+import { useGestureRecognition } from "@/hooks/useGestureRecognition";
 
 function createBaiduMapUrl(query: string) {
   const trimmedQuery = query.trim();
@@ -39,17 +39,8 @@ function MapPanel({ mapUrl }: { mapUrl: string }) {
         try {
           var map = new BMap.Map("map");
           map.enableScrollWheelZoom(true);
-          // Dark style to match prototype
-          map.setMapStyleV2({
-            styleJson: [{
-              "featureType": "all",
-              "elementType": "all",
-              "stylers": {
-                "lightness": 10,
-                "saturation": -100
-              }
-            }]
-          });
+          // 切换为百度地图官方的黑夜模式
+          map.setMapStyle({ style: "dark" });
           
           var local = new BMap.LocalSearch(map, {
             onSearchComplete: function(results) {
@@ -886,7 +877,7 @@ function Frame17({
 }) {
   return (
     <div className="content-stretch flex gap-[16px] items-center pr-[12px] py-[12px] relative size-full">
-      <PageSidebar activePage="nav" dataName="sider-bar" />
+      <PageSidebar activePage="nav" />
       <div className="content-stretch flex h-[652px] items-start justify-start gap-[16px] relative rounded-[32px] shrink-0 w-[1778px]">
         <Frame14 onNavigate={onNavigate} />
         <div className="h-full relative flex-1 min-w-0">
