@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router";
 import navigationIcons from "@/icons/navigationIcons";
-import bgImg from "figma:asset/b1457bb4909c074b9ca61a20211a75f7d79e1703.png";
+import bgImg from "figma:asset/51f4b2dc353102219050504782ad446e7199fcb1.png";
 import albumImg from "figma:asset/db85ce748e0e50fb1dd3b019004adb2ab53b0657.png";
 import { StatusBar } from "@/components/common/StatusBar";
 import { GestureWindow } from "@/components/common/GestureWindow";
@@ -124,12 +124,12 @@ function QuickSearchPanel({
   onQuickSearch: (query: string) => void;
 }) {
   return (
-    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0">
-      <div className="backdrop-blur-[25px] bg-[rgba(35,35,35,0.5)] col-1 h-[445px] ml-0 mt-0 rounded-[12px] row-1 w-[371px]" />
+    <div className="relative flex-1 w-full">
+      <div className="absolute inset-0 backdrop-blur-[25px] bg-[rgba(35,35,35,0.5)] rounded-[12px]" />
       {recentSearches.length === 0 ? (
-        <p className="col-1 font-['PingFang_SC:Regular',sans-serif] leading-[normal] ml-[36px] mt-[133px] not-italic relative row-1 text-[20px] text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">暂无最近搜索记录</p>
+        <p className="absolute top-[133px] left-[36px] font-['PingFang_SC:Regular',sans-serif] leading-[normal] not-italic text-[20px] text-[rgba(255,255,255,0.5)] text-center whitespace-nowrap">暂无最近搜索记录</p>
       ) : (
-        <div className="col-1 content-stretch flex flex-col gap-[14px] items-start ml-[36px] mt-[118px] relative row-1 w-[299px]">
+        <div className="absolute top-[118px] left-[36px] content-stretch flex flex-col gap-[14px] items-start w-[299px]">
           {recentSearches.map((item) => (
             <button
               key={item}
@@ -144,7 +144,7 @@ function QuickSearchPanel({
       )}
       {/* Quick access buttons */}
       <button
-        className="bg-transparent border-0 col-1 content-stretch flex items-center justify-end ml-0 mt-0 p-0 relative row-1"
+        className="bg-transparent border-0 absolute top-0 left-0 w-[160px] content-stretch flex items-center justify-end p-0"
         onClick={() => onQuickSearch("附近住宅小区")}
         type="button"
       >
@@ -156,7 +156,7 @@ function QuickSearchPanel({
         <p className="font-['PingFang_SC:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[24px] text-center text-white w-[76px]">住宅</p>
       </button>
       <button
-        className="bg-transparent border-0 col-1 content-stretch flex items-center ml-[209px] mt-0 p-0 relative row-1"
+        className="bg-transparent border-0 absolute top-0 left-[225px] content-stretch flex items-center p-0"
         onClick={() => onQuickSearch("成都高新区写字楼")}
         type="button"
       >
@@ -167,7 +167,7 @@ function QuickSearchPanel({
         </div>
         <p className="font-['PingFang_SC:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[24px] text-center text-white w-[76px]">公司</p>
       </button>
-      <div className="col-1 content-stretch flex font-['PingFang_SC:Regular',sans-serif] gap-[64px] items-start leading-[normal] ml-[40px] mt-[83px] not-italic relative row-1 text-[24px] text-center text-white w-[303px]">
+      <div className="absolute top-[83px] left-[40px] content-stretch flex font-['PingFang_SC:Regular',sans-serif] gap-[64px] items-start leading-[normal] not-italic text-[24px] text-center text-white w-[303px]">
         {[
           { label: "最近", query: "附近停车场" },
           { label: "收藏夹", query: "成都写字楼" },
@@ -178,7 +178,7 @@ function QuickSearchPanel({
           </button>
         ))}
       </div>
-      <div className="col-1 h-0 ml-[21.5px] mt-[72px] relative row-1 w-[326px]">
+      <div className="absolute top-[72px] left-[23px] h-0 w-[352px]">
         <div className="absolute inset-[-0.5px_-0.15%]">
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 327 1">
             <path d="M0.5 0.5H326.5" stroke="white" strokeLinecap="round" strokeOpacity="0.25" />
@@ -304,33 +304,26 @@ export function NavigationPage() {
 
   return (
     <div className="content-stretch flex flex-col items-start relative size-full" data-name="导航">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-[207.34%] left-[-2.39%] max-w-none top-[-56.6%] w-[103.26%]" src={bgImg} />
-      </div>
+      <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={bgImg} />
       <StatusBar />
       <div className="content-stretch flex gap-[16px] items-center pr-[12px] py-[12px] relative size-full">
         <PageSidebar activePage="nav" />
-        <div className="content-stretch flex h-[652px] items-start justify-start gap-[16px] relative rounded-[32px] shrink-0 w-[1778px]">
-          {/* Gesture Window (absolute positioned for nav layout) */}
-          <div className="content-stretch flex flex-col h-[652px] items-start relative shrink-0 w-[300px]">
-            <GestureWindow
-              absolute
-              heightClass="h-[658px]"
-              onGestureDetected={(gesture) => {
-                if (gesture === "Swipe_Up" || gesture === "Swipe_Down" || gesture === "Pointing_Up") {
-                  navigate("/");
-                } else if (gesture === "Victory" || gesture === "ILoveYou") {
-                  navigate("/music");
-                }
-              }}
-            />
-          </div>
+        <div className="content-stretch flex h-full items-end gap-[16px] relative rounded-[32px] flex-1">
+          <GestureWindow
+            onGestureDetected={(gesture) => {
+              if (gesture === "Swipe_Up" || gesture === "Swipe_Down" || gesture === "Pointing_Up") {
+                navigate("/");
+              } else if (gesture === "Victory" || gesture === "ILoveYou") {
+                navigate("/music");
+              }
+            }}
+          />
           {/* Map + Controls */}
           <div className="h-full relative flex-1 min-w-0">
             <MapPanel mapUrl={mapUrl} />
             <div className="absolute inset-0 pointer-events-none">
-              <div className="content-stretch flex items-end justify-between relative size-full pointer-events-none [&>*]:pointer-events-auto">
-                <div className="content-stretch flex flex-col gap-[19px] items-center relative shrink-0 w-[371px]">
+              <div className="content-stretch flex items-end justify-between relative size-full pointer-events-none p-[12px] [&>*]:pointer-events-auto">
+                <div className="content-stretch flex flex-col gap-[12px] items-center relative shrink-0 w-[400px] h-full">
                   <SearchBox
                     searchValue={searchValue}
                     onSearchValueChange={setSearchValue}
@@ -340,7 +333,6 @@ export function NavigationPage() {
                   <MapToolbar />
                 </div>
                 <TripInfo />
-                <MiniPlayer />
               </div>
             </div>
           </div>

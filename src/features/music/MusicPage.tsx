@@ -181,20 +181,31 @@ function PlayerPanel({
           </div>
         </div>
         <div className="relative shrink-0 size-[72px] cursor-pointer" onClick={onTogglePlay}>
-          <div className="absolute inset-[12.5%]">
-            {isPlaying ? (
-              <svg className="absolute block size-full" fill="white" preserveAspectRatio="none" viewBox="0 0 24 24">
-                <rect x="6" y="4" width="4" height="16" />
-                <rect x="14" y="4" width="4" height="16" />
+          {isPlaying ? (
+            <>
+              <div className="absolute inset-[11.11%]">
+                <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 56 56">
+                  <path d="M27.9994 56C12.6024 56 0 43.3999 0 28.0003C0 12.6007 12.6024 0 27.9994 0C43.3964 0 56 12.6001 56 28.0003C56 43.4005 43.4001 56 27.9994 56ZM37.0335 49.4804C42.6301 47.0897 47.0848 42.6338 49.4675 37.0433C50.6799 34.1818 51.3045 31.1067 51.3045 28C51.3045 24.8933 50.6799 21.8182 49.4675 18.9567C47.0852 13.3655 42.6304 8.90891 37.0335 6.51773C34.1766 5.30675 31.1045 4.68263 28.0006 4.68263C24.8967 4.68263 21.8246 5.30675 18.9677 6.51773C13.3699 8.90838 8.91413 13.365 6.53121 18.9567C5.31887 21.8182 4.6942 24.8933 4.6942 28C4.6942 31.1067 5.31887 34.1818 6.53121 37.0433C8.91452 42.6343 13.3702 47.0902 18.9677 49.4804C21.8246 50.6914 24.8967 51.3155 28.0006 51.3155C31.1045 51.3155 34.1766 50.6914 37.0335 49.4804Z" fill="white" />
+                </svg>
+              </div>
+              <div className="absolute inset-[29.17%_36.12%_29.26%_55.56%]">
+                <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 5.99273 29.9363">
+                  <path d="M2.99601 0H2.99672C4.99406 0 5.99273 0.998673 5.99273 2.99602V26.9402C5.99273 28.9376 4.99406 29.9363 2.99672 29.9363H2.99601C0.998671 29.9363 0 28.9376 0 26.9402V2.99602C0 0.998673 0.998671 0 2.99601 0Z" fill="white" />
+                </svg>
+              </div>
+              <div className="absolute inset-[29.17%_53.96%_29.26%_37.5%]">
+                <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 6.14742 29.9363">
+                  <path d="M3.07406 0H3.07336C5.12274 0 6.14742 1.02469 6.14742 3.07406V26.8622C6.14742 28.9116 5.12274 29.9363 3.07336 29.9363H3.07406C1.02469 29.9363 0 28.9116 0 26.8622V3.07406C0 1.02469 1.02469 0 3.07406 0Z" fill="white" />
+                </svg>
+              </div>
+            </>
+          ) : (
+            <div className="absolute inset-[10.49%]">
+              <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 56.8889 56.8889">
+                <path d="M28.4444 0C22.8187 1.213e-08 17.3192 1.66824 12.6416 4.79375C7.9639 7.91927 4.31811 12.3617 2.16522 17.5592C0.0123246 22.7568 -0.55097 28.476 0.546565 33.9937C1.6441 39.5114 4.35317 44.5797 8.3312 48.5577C12.3092 52.5357 17.3775 55.2448 22.8952 56.3423C28.4129 57.4399 34.1321 56.8766 39.3297 54.7237C44.5272 52.5708 48.9696 48.925 52.0951 44.2473C55.2207 39.5697 56.8889 34.0702 56.8889 28.4444C56.8889 24.7091 56.1532 21.0103 54.7237 17.5592C53.2942 14.1082 51.199 10.9725 48.5577 8.33118C45.9164 5.68987 42.7807 3.59467 39.3297 2.1652C35.8786 0.735737 32.1798 -8.05402e-09 28.4444 0ZM28.4444 52.3976C23.707 52.3976 19.0758 50.9928 15.1368 48.3608C11.1977 45.7288 8.12753 41.9878 6.31457 37.6109C4.50161 33.2341 4.02725 28.4179 4.95149 23.7714C5.87573 19.1249 8.15706 14.8569 11.507 11.507C14.8569 8.15704 19.1249 5.87572 23.7714 4.95148C28.4179 4.02724 33.2341 4.50159 37.6109 6.31456C41.9878 8.12752 45.7288 11.1977 48.3608 15.1367C50.9928 19.0758 52.3977 23.7069 52.3977 28.4444C52.3977 31.59 51.7781 34.7048 50.5743 37.6109C49.3706 40.5171 47.6062 43.1577 45.3819 45.3819C43.1577 47.6062 40.5171 49.3706 37.6109 50.5743C34.7048 51.7781 31.59 52.3976 28.4444 52.3976ZM38.6695 26.9474L31.2889 22.6358L23.4442 18.0547C23.2124 17.945 22.955 17.9008 22.6999 17.9267C22.4447 17.9526 22.2015 18.0478 21.9965 18.2019C21.7916 18.3561 21.6326 18.5633 21.5368 18.8012C21.441 19.0391 21.4121 19.2986 21.4531 19.5518V37.2472C21.4121 37.5004 21.441 37.76 21.5368 37.9979C21.6326 38.2358 21.7916 38.443 21.9965 38.5971C22.2015 38.7512 22.4447 38.8464 22.6999 38.8724C22.955 38.8983 23.2124 38.854 23.4442 38.7443L31.2889 34.1633L38.6695 29.8667C38.9103 29.7069 39.1079 29.49 39.2446 29.2353C39.3813 28.9806 39.4528 28.6961 39.4528 28.407C39.4528 28.118 39.3813 27.8334 39.2446 27.5787C39.1079 27.324 38.9103 27.1071 38.6695 26.9474Z" fill="white" />
               </svg>
-            ) : (
-              <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 54 54">
-                <path d={commonIcons.peda9000} fill="white" fillOpacity="0.85098" />
-                <path d={commonIcons.p1a0f6900} fill="white" fillOpacity="0.85098" />
-                <path d={commonIcons.p195c6000} fill="white" fillOpacity="0.85098" />
-              </svg>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="relative shrink-0 size-[72px] cursor-pointer" onClick={onNext}>
           <div className="absolute inset-[19.99%_23.66%_19.99%_23.27%]">
@@ -319,11 +330,11 @@ export function MusicPage() {
       <audio ref={audioRef} preload="metadata" className="hidden" />
       <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={bgImg} />
       <StatusBar />
-      <div className="h-[676px] relative shrink-0 w-full">
+      <div className="flex-[1_0_0] min-h-px min-w-px relative w-full">
         <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
           <div className="content-stretch flex gap-[16px] items-center pr-[12px] py-[12px] relative size-full">
             <PageSidebar activePage="music" />
-            <div className="content-stretch flex h-full items-end justify-between relative rounded-[32px] shrink-0 w-[1778px]">
+            <div className="content-stretch flex h-full items-end gap-[16px] relative rounded-[32px] shrink-0 w-[1778px]">
               <GestureWindow
                 onGestureDetected={(gesture) => {
                   if (gesture === "Closed_Fist") setIsPlaying(false);
