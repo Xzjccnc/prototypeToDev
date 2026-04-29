@@ -17,12 +17,54 @@ function createBaiduMapUrl(query: string): string {
 }
 
 function MapPanel({ mapUrl }: { mapUrl: string }) {
+  const queryMatch = mapUrl.match(/query=([^&]+)/) || mapUrl.match(/title=([^&]+)/);
+  const query = queryMatch ? decodeURIComponent(queryMatch[1]) : "天府广场";
+
+  const mapHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #222; }
+        .anchorBL, .BMap_cpyCtrl, .BMap_scaleCtrl, .BMap_stdMpCtrl, .BMap_noprint { display: none !important; }
+      </style>
+      <script src="https://api.map.baidu.com/api?v=3.0&ak=E4805d16520de693a3fe707cdc962045"></script>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script>
+        try {
+          var map = new BMap.Map("map");
+          map.enableScrollWheelZoom(true);
+          // 切换为百度地图官方的黑夜模式
+          map.setMapStyle({ style: "dark" });
+
+          var local = new BMap.LocalSearch(map, {
+            onSearchComplete: function(results) {
+              if (local.getStatus() == BMAP_STATUS_SUCCESS) {
+                var pt = results.getPoi(0).point;
+                map.centerAndZoom(pt, 16);
+                map.addOverlay(new BMap.Marker(pt));
+              } else {
+                map.centerAndZoom(new BMap.Point(104.066541, 30.572269), 16);
+              }
+            }
+          });
+          local.search("${query}");
+        } catch(e) {}
+      </script>
+    </body>
+    </html>
+  `;
+
   return (
-    <div className="absolute h-[456px] overflow-hidden right-0 rounded-[24px] top-0 w-[1002px] pointer-events-auto" style={{ zIndex: 10 }}>
-      <div aria-hidden="true" className="absolute backdrop-blur-[25px] bg-[rgba(35,35,35,0.35)] inset-0 pointer-events-none rounded-[24px]" />
+    <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-auto" style={{ zIndex: 0 }}>
+      <div aria-hidden="true" className="absolute backdrop-blur-[25px] bg-[rgba(35,35,35,0.35)] inset-0 pointer-events-none rounded-[32px]" />
       <iframe
-        className="absolute inset-0 h-full w-full border-0 rounded-[24px]"
-        src={mapUrl}
+        className="absolute inset-0 h-full w-full border-0 rounded-[32px]"
+        style={{ pointerEvents: "auto" }}
+        srcDoc={mapHtml}
         title="百度地图"
       />
     </div>
@@ -268,7 +310,7 @@ export function NavigationPage() {
       <StatusBar />
       <div className="content-stretch flex gap-[16px] items-center pr-[12px] py-[12px] relative size-full">
         <PageSidebar activePage="nav" />
-        <div className="content-stretch flex h-[652px] items-end justify-between relative rounded-[32px] shrink-0 w-[1778px]">
+        <div className="content-stretch flex h-[652px] items-start justify-start gap-[16px] relative rounded-[32px] shrink-0 w-[1778px]">
           {/* Gesture Window (absolute positioned for nav layout) */}
           <div className="content-stretch flex flex-col h-[652px] items-start relative shrink-0 w-[300px]">
             <GestureWindow
@@ -284,10 +326,10 @@ export function NavigationPage() {
             />
           </div>
           {/* Map + Controls */}
-          <div className="h-full relative shrink-0 w-[1411px]">
+          <div className="h-full relative flex-1 min-w-0">
             <MapPanel mapUrl={mapUrl} />
-            <div className="absolute bottom-0 left-0">
-              <div className="content-stretch flex items-end justify-between relative shrink-0 w-[1411px]">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="content-stretch flex items-end justify-between relative size-full pointer-events-none [&>*]:pointer-events-auto">
                 <div className="content-stretch flex flex-col gap-[19px] items-center relative shrink-0 w-[371px]">
                   <SearchBox
                     searchValue={searchValue}

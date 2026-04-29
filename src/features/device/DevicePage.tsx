@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import deviceIcons from "@/icons/deviceIcons";
 import bgImg from "figma:asset/9a7a4c29b4df435e255a166237e3d537fbe93e3c.png";
 import seatImg from "figma:asset/c0ae25775c422c652a982fbf7231ff7c5b21c874.png";
 import { StatusBar } from "@/components/common/StatusBar";
+import { GestureWindow } from "@/components/common/GestureWindow";
 import { PageSidebar } from "@/components/common/PageSidebar";
 
 /* ── Seat Slider ── */
@@ -259,6 +261,7 @@ function ClimateControl() {
 
 /* ── Page Root ── */
 export function DevicePage() {
+  const navigate = useNavigate();
   const [sliderValue, setSliderValue] = useState(0);
 
   return (
@@ -283,11 +286,18 @@ export function DevicePage() {
                 <div className="content-stretch flex flex-[1_0_0] flex-col h-[676px] items-center justify-between min-h-px min-w-px overflow-clip pb-[18px] pt-[8px] relative rounded-[24px]">
                   {/* Top: Gesture + Seat */}
                   <div className="content-stretch flex h-[535px] items-end justify-between overflow-clip relative shrink-0 w-[1694px]">
-                    {/* Left: Gesture display panel */}
-                    <div className="content-stretch flex flex-col gap-[34px] h-[541px] items-center justify-end overflow-clip px-px relative rounded-[12px] shrink-0">
-                      <div className="bg-[rgba(35,35,35,0.5)] h-[212px] mix-blend-multiply rounded-[24px] shrink-0 w-full" />
-                      <GestureDisplayPanel />
-                    </div>
+                    <GestureWindow
+                      heightClass="h-[541px]"
+                      onGestureDetected={(gesture) => {
+                        if (gesture === "Swipe_Up" || gesture === "Swipe_Down") {
+                          navigate("/music");
+                        } else if (gesture === "Pointing_Up") {
+                          navigate("/");
+                        } else if (gesture === "Victory" || gesture === "ILoveYou") {
+                          navigate("/nav");
+                        }
+                      }}
+                    />
                     {/* Right: Seat */}
                     <div className="bg-[rgba(35,35,35,0.5)] content-stretch flex h-[476px] items-center justify-center overflow-clip px-[8px] relative rounded-[24px] shrink-0 w-[669px]">
                       <div className="content-stretch flex items-center justify-center overflow-clip relative shrink-0 w-[570px]">
